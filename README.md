@@ -53,10 +53,13 @@ and routes structured outputs to a human auditor for final validation.
 ## Repository Structure
 ```
 Cotiviti_Intern_Assessment/
-├── app.py                  # Main Streamlit application
-├── requirements.txt        # Python dependencies
-├── .gitignore              # Git ignore rules
-└── README.md               # Project documentation
+├── app.py                                              # Main Streamlit application
+├── requirements.txt                                    # Python dependencies
+├── .gitignore                                          # Git ignore rules
+├── README.md                                           # Project documentation
+├── INTERN_Rashmita_Kudamala_Indiana_University_Indianapolis.docx   # Written report
+├── Intern_Cotiviti_HGARS_Presentation_Rashmita_Kudamala.pptx      # Slide presentation
+└── INTERN_Rashmita_Kudamala_Indiana_University_Indianapolis.mp4    # Video recording
 ```           
 
 ## Note on Data Usage
