@@ -120,9 +120,11 @@ MOCK_CASES = {
 SYSTEM_PROMPT = """You are a clinical AI agent for a healthcare payer analytics platform analyzing \
 medical records and billing data for Treatment, Payment & Operations (TPO).
 
-Given the clinical or billing text provided, generate exactly 4 chain-of-thought reasoning steps.
+Given the clinical or billing text provided, generate exactly 4 chain-of-thought reasoning steps \
+followed by a references section.
 
-Format EACH step exactly as:
+Format your output exactly as:
+
 **Step N — Step Name:** Reasoning here.
 
 The 4 steps must cover:
@@ -131,8 +133,19 @@ The 4 steps must cover:
 3. Predictive Inference — perform risk or compliance classification based on extracted patterns
 4. TPO Recommendation — specific recommendation for treatment, payment adjudication, or operational routing
 
-Be specific to the exact text provided. Use precise clinical and healthcare operations terminology. \
-Keep each step to 2-3 sentences. Output only the 4 steps, no preamble or closing remarks."""
+After the 4 steps, add exactly this section:
+
+**Clinical & Regulatory Basis:**
+List 2-3 real, established sources. For each, include the specific program name, issuing body, \
+and one concrete detail (year, regulation number, or specific provision) that makes it independently verifiable.
+- [Specific Source Name, Issuing Body, Year/ID]: One sentence on relevance to this specific case.
+
+Example: [Hospital Readmissions Reduction Program (HRRP), CMS, ACA Section 3025, 2012]: Directly applicable as COPD is one of the six tracked conditions subject to readmission penalties.
+
+Only cite real, verifiable sources — CMS programs, AHRQ guidelines, Joint Commission standards, \
+ICD coding guidelines, peer-reviewed clinical literature. Do not invent sources. \
+Be specific to the exact clinical scenario in the text. \
+Keep each reasoning step to 2-3 sentences."""
 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 st.sidebar.header("⚙️ HGARS Configuration Panel")
@@ -194,7 +207,20 @@ with col1:
 
     if st.session_state.cot_output:
         st.subheader("2. Chain-of-Thought Reasoning")
-        st.markdown(st.session_state.cot_output)
+        if "**Clinical & Regulatory Basis:**" in st.session_state.cot_output:
+            parts = st.session_state.cot_output.split("**Clinical & Regulatory Basis:**")
+            st.markdown(parts[0].strip())
+            st.markdown("---")
+            ref_html = parts[1].strip().replace("\n", "<br>").replace("- [", "• [")
+            st.markdown(
+                f'<div style="font-size:12px;color:#6B7280;line-height:1.8;">'
+                f'<span style="font-weight:600;font-size:13px;color:#374151;">'
+                f'Clinical & Regulatory Basis</span><br><br>'
+                f'{ref_html}</div>',
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(st.session_state.cot_output)
         st.success("Agentic analysis complete. Output routed to human validation checkpoint.")
 
 with col2:
@@ -204,24 +230,24 @@ with col2:
         st.markdown(f"""
         <div style="background:#1a2332;border-left:4px solid #e05252;
         padding:14px;border-radius:6px;text-align:center;">
-        <div style="color:#aaa;font-size:11px;margin-bottom:6px;">READMISSION RISK</div>
-        <div style="color:#e05252;font-size:17px;font-weight:700;">
+        <div style="color:#aaa;font-size:10px;margin-bottom:4px;letter-spacing:0.5px;">READMISSION RISK</div>
+        <div style="color:#e05252;font-size:13px;font-weight:700;line-height:1.4;word-break:normal;overflow-wrap:break-word;">
         {case["metrics"]["Readmission Risk"]}</div></div>
         """, unsafe_allow_html=True)
     with m2:
         st.markdown(f"""
         <div style="background:#1a2332;border-left:4px solid #f0c040;
         padding:14px;border-radius:6px;text-align:center;">
-        <div style="color:#aaa;font-size:11px;margin-bottom:6px;">DISCHARGE / AUTH STATUS</div>
-        <div style="color:#f0c040;font-size:17px;font-weight:700;">
+        <div style="color:#aaa;font-size:10px;margin-bottom:4px;letter-spacing:0.5px;">DISCHARGE / AUTH STATUS</div>
+        <div style="color:#f0c040;font-size:13px;font-weight:700;line-height:1.4;word-break:normal;overflow-wrap:break-word;">
         {case["metrics"]["Discharge Status"]}</div></div>
         """, unsafe_allow_html=True)
     with m3:
         st.markdown(f"""
         <div style="background:#1a2332;border-left:4px solid #4fc3f7;
         padding:14px;border-radius:6px;text-align:center;">
-        <div style="color:#aaa;font-size:11px;margin-bottom:6px;">TPO COST TIER</div>
-        <div style="color:#4fc3f7;font-size:17px;font-weight:700;">
+        <div style="color:#aaa;font-size:10px;margin-bottom:4px;letter-spacing:0.5px;">TPO COST TIER</div>
+        <div style="color:#4fc3f7;font-size:13px;font-weight:700;line-height:1.4;word-break:normal;overflow-wrap:break-word;">
         {case["metrics"]["Cost Tier"]}</div></div>
         """, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
